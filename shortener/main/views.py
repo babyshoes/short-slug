@@ -1,20 +1,43 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.http import HttpResponse, JsonResponse, Http404
 from django.db import IntegrityError
 from django.contrib import messages
 from django.utils import timezone
 from .models import URL, Visit
+from .forms import URLForm, CustomURLForm
 from .helpers import encode, validate, recreate
 
+
 def index(request):
-    return HttpResponse(f"some info: {request.path} done")
+    form = URLForm()
+    if request.method == "POST":
+        form = URLForm(request.POST)
+        if form.is_valid():
+            long_url = form.cleaned_data.get("url")
+            short_url = encode(long_url)
+            return create_and_validate(long_url, short_url, custom=False)
+    context = {'form': form}
+    return render(request, 'main/index.html', context)
+    # return render(request, 'main/index.html')
+    # return HttpResponse(f"some info: {request.path} done")
+
+def test(request):
+    form = CustomURLForm()
+    if request.method == "POST":
+        form = CustomURLForm(request.POST)
+        if form.is_valid():
+            long_url = form.cleaned_data.get("url")
+            short_url = form.cleaned_data.get("short")
+            return create_and_validate(long_url, short_url, custom=True)
+    context = {'form': form}
+    return render(request, 'main/custom_url.html', context)
 
 def random(request, long_url):
     short_url = encode(long_url)
-    return create_and_validate(long_url, short_url, custom=True)
+    return create_and_validate(long_url, short_url, custom=False)
 
 def custom(request, long_url, short_url):
-    return create_and_validate(long_url, short_url)
+    return create_and_validate(long_url, short_url, custom=True)
 
 def create_and_validate(long_url, short_url, custom=False):
     try:
@@ -31,7 +54,7 @@ def create_and_validate(long_url, short_url, custom=False):
         return HttpResponse(f"{e}")
     except IntegrityError as e:
         return HttpResponse(f"A slug by that name exists. {e}")
-    except e:
+    except BaseException as e:
         return HttpResponse(f"OOPSU {e}")
 
 # make into own app
