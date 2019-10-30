@@ -49,7 +49,7 @@ def create(long_url, short_url, custom):
 def create_and_validate(long_url, short_url, custom=False):
     try:
         validate(short_url)
-        create(long_url, short_url, custom)
+        return create(long_url, short_url, custom)
     except ValueError as e:
         return HttpResponse(f"{e}")
     except IntegrityError as e:
@@ -58,7 +58,7 @@ def create_and_validate(long_url, short_url, custom=False):
         else:
             return create_and_validate(long_url, encode(long_url), custom)
     except BaseException as e:
-        return HttpResponse(f"OOPSU {e}")
+        return HttpResponse(f"Something else has gone wrong!: {e}")
 
 # TO DO: make into own app?
 def reroute(request, slug):
@@ -68,7 +68,7 @@ def reroute(request, slug):
         ip_address = fwded_for.split(',')[-1].strip() if fwded_for else remote_addr
 
         url = URL.objects.get(short_url=slug)
-        long_url = recreate(url.long_url)
+        long_url = url.long_url
         
         visit = Visit(
             url=url,
@@ -76,10 +76,9 @@ def reroute(request, slug):
             user_ip=ip_address 
         )
         visit.save()
-        # return HttpResponse(f"{long_url}, {ip_address}, {remote_addr}")
         return redirect(long_url)
     except URL.DoesNotExist:
-        raise Http404("???")
+        raise Http404("Sorry I don't recognize that short_url!")
 
 def stats(request, slug):
     url = URL.objects.get(short_url=slug)
