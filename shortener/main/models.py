@@ -8,6 +8,10 @@ class URL(models.Model):
     custom = models.BooleanField(default=False)
     # user_id field? stats + abuse
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['long_url'], condition=models.Q(custom=False), name='unique_random_url')
+        ]
     def __str__(self):
         return f"{self.short_url} for {self.long_url}"
 
