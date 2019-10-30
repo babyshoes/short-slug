@@ -6,13 +6,7 @@ __chars = list(string.ascii_letters) + [str(i) for i in range(0,9)]
 __length = 6
 __seed = 1
 random.seed(__seed)
-
-# check if valid long first??
-def scrub(long):
-    return long.replace("http://", "")
-
-def recreate(long):
-    return "http://" + long
+# set seed w/ session?
     
 def validate(short):
     if re.search('\W', short):
@@ -20,12 +14,5 @@ def validate(short):
     else:
         return True
 
-def check_if_exists(long_url):
-    # and has random short already
-    pass
-
 def encode(long_url):
     return "".join([random.choice(__chars) for i in range(__length)])
-
-def decode(short_url):
-    pass

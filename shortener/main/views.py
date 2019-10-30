@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import URL, Visit
 from .forms import URLForm, CustomURLForm
-from .helpers import encode, validate, recreate
+from .helpers import *
 
 def random(request):
     form = URLForm()
@@ -36,25 +36,31 @@ def random_already_exists(long_url):
     except:
         return None
 
+def create(long_url, short_url, custom):
+    url = URL(
+        short_url=short_url,
+        long_url=long_url,
+        create_time=timezone.now(),
+        custom=custom
+    )
+    url.save()
+    return HttpResponse(f"SAVED! {long_url} shortened to {short_url}")
+
 def create_and_validate(long_url, short_url, custom=False):
     try:
         validate(short_url)
-        url = URL(
-            short_url=short_url,
-            long_url=long_url,
-            create_time=timezone.now(),
-            custom=custom
-        )
-        url.save()
-        return HttpResponse(f"SAVED! {long_url} shortened to {short_url}")
+        create(long_url, short_url, custom)
     except ValueError as e:
         return HttpResponse(f"{e}")
     except IntegrityError as e:
-        return HttpResponse(f"A slug by that name exists. {e}")
+        if custom:
+            return HttpResponse(f"A slug by that name exists. {e}")
+        else:
+            return create_and_validate(long_url, encode(long_url), custom)
     except BaseException as e:
         return HttpResponse(f"OOPSU {e}")
 
-# make into own app
+# TO DO: make into own app?
 def reroute(request, slug):
     try:
         fwded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -70,8 +76,8 @@ def reroute(request, slug):
             user_ip=ip_address 
         )
         visit.save()
-        return HttpResponse(f"{long_url}, {ip_address}, {remote_addr}")
-        # return redirect(long_url)
+        # return HttpResponse(f"{long_url}, {ip_address}, {remote_addr}")
+        return redirect(long_url)
     except URL.DoesNotExist:
         raise Http404("???")
 
