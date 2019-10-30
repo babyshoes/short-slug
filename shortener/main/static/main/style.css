@@ -1,0 +1,10 @@
+.header {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.2em;
+    padding-left: 2%;
+}
+
+.content{
+    text-align: center;
+    font-family: 'Titillium Web', sans-serif;
+}

@@ -1,19 +1,18 @@
 {% load static %}
 <html>
     <head>
-        <!-- <link rel="stylesheet" href="{% static 'css/app.css'%}"> -->
+        <link href="https://fonts.googleapis.com/css?family=Pacifico|Titillium+Web&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{% static 'main/style.css' %}">
     </head>
     <body>
         <div class="header">
-                <h1>slug.ly</h1>
-            </div>
-            <div class="content">
-                <form method="POST" class="post-form">{% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="save btn btn-default">Save</button>
-                </form>
-                <a href="{% url 'test' %}" class="top-menu">Make custom instead</a>
-            </div>
+            <h1>slug.ly</h1>
+        </div>
+        <div class="content">
+            {% block content %}
+            {% endblock %}
+
+        </div>
         </div>
     </body>
 

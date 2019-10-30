@@ -7,8 +7,7 @@ from .models import URL, Visit
 from .forms import URLForm, CustomURLForm
 from .helpers import encode, validate, recreate
 
-
-def index(request):
+def random(request):
     form = URLForm()
     if request.method == "POST":
         form = URLForm(request.POST)
@@ -17,11 +16,9 @@ def index(request):
             short_url = encode(long_url)
             return create_and_validate(long_url, short_url, custom=False)
     context = {'form': form}
-    return render(request, 'main/index.html', context)
-    # return render(request, 'main/index.html')
-    # return HttpResponse(f"some info: {request.path} done")
+    return render(request, 'main/random_url.html', context)
 
-def test(request):
+def custom(request):
     form = CustomURLForm()
     if request.method == "POST":
         form = CustomURLForm(request.POST)
@@ -31,13 +28,6 @@ def test(request):
             return create_and_validate(long_url, short_url, custom=True)
     context = {'form': form}
     return render(request, 'main/custom_url.html', context)
-
-def random(request, long_url):
-    short_url = encode(long_url)
-    return create_and_validate(long_url, short_url, custom=False)
-
-def custom(request, long_url, short_url):
-    return create_and_validate(long_url, short_url, custom=True)
 
 def create_and_validate(long_url, short_url, custom=False):
     try:
