@@ -14,7 +14,7 @@ def random(request):
         if form.is_valid():
             long_url = form.cleaned_data.get("url")
             short_url = encode(long_url)
-            return create_and_validate(long_url, short_url, custom=False)
+            return random_already_exists(long_url) or create_and_validate(long_url, short_url, custom=False)
     context = {'form': form}
     return render(request, 'main/random_url.html', context)
 
@@ -28,6 +28,13 @@ def custom(request):
             return create_and_validate(long_url, short_url, custom=True)
     context = {'form': form}
     return render(request, 'main/custom_url.html', context)
+
+def random_already_exists(long_url):
+    try:
+        exists = URL.objects.get(long_url=long_url, custom=False)
+        return HttpResponse(f"{exists.long_url} already shortened to {exists.short_url}")
+    except:
+        return None
 
 def create_and_validate(long_url, short_url, custom=False):
     try:
